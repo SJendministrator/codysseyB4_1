@@ -1,5 +1,5 @@
 # crontab 등록과 monitor.log 자동 누적
-# 수집: 2026-11-05 21:50:57 KST  host: agent-server
+# 수집: 2026-11-05 21:56:16 KST  host: agent-server
 
 $ crontab -u agent-admin -l
 # agent-admin crontab — setup/05_deploy_cron.sh 가 `crontab -u agent-admin` 으로 등록
@@ -19,30 +19,30 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 $ systemctl is-active cron
 active
 
-# 대기 전: 21:50:57  monitor.log 11줄
+# 대기 전: 21:56:16  monitor.log 20줄
 $ tail -n 3 /var/log/agent-app/monitor.log
-[2026-11-05 21:50:01] PID:5232 CPU:3.2% MEM:5.1% DISK_USED:1%
-[2026-11-05 21:50:55] PID:5232 CPU:3.6% MEM:5.8% DISK_USED:1%
-[2026-11-05 21:50:56] PID:5232 CPU:3.6% MEM:5.8% DISK_USED:1%
+[2026-11-05 21:56:01] PID:5232 CPU:3.1% MEM:5.5% DISK_USED:1%
+[2026-11-05 21:56:14] PID:5232 CPU:2.6% MEM:5.4% DISK_USED:1%
+[2026-11-05 21:56:15] PID:5232 CPU:3.1% MEM:5.4% DISK_USED:1%
 
-# 대기 후: 21:52:07  monitor.log 13줄 (+2)
+# 대기 후: 21:57:26  monitor.log 21줄 (+1)
 $ tail -n 5 /var/log/agent-app/monitor.log
-[2026-11-05 21:50:01] PID:5232 CPU:3.2% MEM:5.1% DISK_USED:1%
-[2026-11-05 21:50:55] PID:5232 CPU:3.6% MEM:5.8% DISK_USED:1%
-[2026-11-05 21:50:56] PID:5232 CPU:3.6% MEM:5.8% DISK_USED:1%
-[2026-11-05 21:51:01] PID:5232 CPU:2.9% MEM:5.9% DISK_USED:1%
-[2026-11-05 21:52:01] PID:5232 CPU:3.7% MEM:5.9% DISK_USED:1%
+[2026-11-05 21:55:50] PID:5232 CPU:3.2% MEM:5.7% DISK_USED:1%
+[2026-11-05 21:56:01] PID:5232 CPU:3.1% MEM:5.5% DISK_USED:1%
+[2026-11-05 21:56:14] PID:5232 CPU:2.6% MEM:5.4% DISK_USED:1%
+[2026-11-05 21:56:15] PID:5232 CPU:3.1% MEM:5.4% DISK_USED:1%
+[2026-11-05 21:57:01] PID:5232 CPU:3.4% MEM:5.8% DISK_USED:1%
 
-$ bash -c journalctl -u cron --since '-3 min' --no-pager | grep -i agent-admin | tail -5
-Nov 05 21:51:01 agent-server CRON[6837]: (agent-admin) CMD (/home/agent-admin/agent-app/bin/monitor.sh > /dev/null 2>> /var/log/agent-app/cron-error.log)
-Nov 05 21:51:02 agent-server CRON[6836]: pam_unix(cron:session): session closed for user agent-admin
-Nov 05 21:52:01 agent-server CRON[6893]: pam_unix(cron:session): session opened for user agent-admin(uid=1000) by (uid=0)
-Nov 05 21:52:01 agent-server CRON[6894]: (agent-admin) CMD (/home/agent-admin/agent-app/bin/monitor.sh > /dev/null 2>> /var/log/agent-app/cron-error.log)
-Nov 05 21:52:02 agent-server CRON[6893]: pam_unix(cron:session): session closed for user agent-admin
+$ journalctl -u cron --since '-3 min' --no-pager | grep -i agent-admin | tail -5
+Nov 05 21:56:01 agent-server CRON[7607]: (agent-admin) CMD (/home/agent-admin/agent-app/bin/monitor.sh > /dev/null 2>> /var/log/agent-app/cron-error.log)
+Nov 05 21:56:02 agent-server CRON[7606]: pam_unix(cron:session): session closed for user agent-admin
+Nov 05 21:57:01 agent-server CRON[7869]: pam_unix(cron:session): session opened for user agent-admin(uid=1000) by (uid=0)
+Nov 05 21:57:01 agent-server CRON[7870]: (agent-admin) CMD (/home/agent-admin/agent-app/bin/monitor.sh > /dev/null 2>> /var/log/agent-app/cron-error.log)
+Nov 05 21:57:02 agent-server CRON[7869]: pam_unix(cron:session): session closed for user agent-admin
 
 $ ls -l /var/log/agent-app
-total 36
--rw-rw----+ 1 agent-admin agent-core 31934 Nov  5 21:52 agent_app.log
+total 52
+-rw-rw----+ 1 agent-admin agent-core 47198 Nov  5 21:57 agent_app.log
 -rw-rw----+ 1 agent-admin agent-core     0 Nov  5 21:43 cron-error.log
--rw-rw----+ 1 agent-admin agent-core   806 Nov  5 21:52 monitor.log
+-rw-rw----+ 1 agent-admin agent-core  1302 Nov  5 21:57 monitor.log
 

@@ -1,5 +1,5 @@
 # monitor.sh 수동 실행
-# 수집: 2026-11-05 21:50:55 KST  host: agent-server
+# 수집: 2026-11-05 21:56:14 KST  host: agent-server
 
 $ sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh
 ====== SYSTEM MONITOR RESULT ======
@@ -9,28 +9,27 @@ Checking process 'agent-app-linux'... [OK] (PID: 5232, all: 5230 5232)
 Checking port 15034... [OK] (LISTEN 0.0.0.0:15034)
 
 [FIREWALL]
-Firewall (ufw)... inactive
-[WARNING] Firewall is not active (ufw: inactive)
+Firewall (ufw)... [OK] active
 
 [RESOURCE MONITORING]
-CPU Usage  : 3.6%
-MEM Usage  : 5.8%
+CPU Usage  : 2.6%
+MEM Usage  : 5.4%
 DISK Used  : 1%
 
 ====== STATISTICS REPORT ======
-  Range   : 2026-11-05 21:42:26 ~ 2026-11-05 21:50:55
+  Range   : 2026-11-05 21:50:55 ~ 2026-11-05 21:56:14
   [CPU]
-    Average : 3.2%
-    Maximum : 6.0% at 2026-11-05 21:44:01
-    Minimum : 1.0% at 2026-11-05 21:45:01
+    Average : 2.9%
+    Maximum : 3.7% at 2026-11-05 21:52:01
+    Minimum : 0.2% at 2026-11-05 21:53:01
   [Memory]
-    Average : 5.5%
-    Maximum : 6.1% at 2026-11-05 21:44:01
-    Minimum : 4.6% at 2026-11-05 21:48:01
+    Average : 5.6%
+    Maximum : 6.1% at 2026-11-05 21:54:01
+    Minimum : 4.5% at 2026-11-05 21:53:01
   [Disk]
     Average : 1.0%
-    Maximum : 1.0% at 2026-11-05 21:42:26
-    Minimum : 1.0% at 2026-11-05 21:42:26
+    Maximum : 1.0% at 2026-11-05 21:50:55
+    Minimum : 1.0% at 2026-11-05 21:50:55
   [Samples]
     Data Points: 10 samples
 
@@ -50,32 +49,31 @@ Checking process 'agent-app-linux'... [OK] (PID: 5232, all: 5230 5232)
 Checking port 15034... [OK] (LISTEN 0.0.0.0:15034)
 
 [FIREWALL]
-Firewall (ufw)... inactive
-[WARNING] Firewall is not active (ufw: inactive)
+Firewall (ufw)... [OK] active
 
 [RESOURCE MONITORING]
-CPU Usage  : 3.6%
-MEM Usage  : 5.8%
+CPU Usage  : 3.1%
+MEM Usage  : 5.4%
 DISK Used  : 1%
 
-[WARNING] CPU threshold exceeded (3.6% > 0%)
-[WARNING] MEM threshold exceeded (5.8% > 1%)
+[WARNING] CPU threshold exceeded (3.1% > 0%)
+[WARNING] MEM threshold exceeded (5.4% > 1%)
 [WARNING] DISK threshold exceeded (1% > 0%)
 
 ====== STATISTICS REPORT ======
-  Range   : 2026-11-05 21:43:01 ~ 2026-11-05 21:50:56
+  Range   : 2026-11-05 21:50:56 ~ 2026-11-05 21:56:15
   [CPU]
-    Average : 3.2%
-    Maximum : 6.0% at 2026-11-05 21:44:01
-    Minimum : 1.0% at 2026-11-05 21:45:01
+    Average : 2.9%
+    Maximum : 3.7% at 2026-11-05 21:52:01
+    Minimum : 0.2% at 2026-11-05 21:53:01
   [Memory]
     Average : 5.5%
-    Maximum : 6.1% at 2026-11-05 21:44:01
-    Minimum : 4.6% at 2026-11-05 21:48:01
+    Maximum : 6.1% at 2026-11-05 21:54:01
+    Minimum : 4.5% at 2026-11-05 21:53:01
   [Disk]
     Average : 1.0%
-    Maximum : 1.0% at 2026-11-05 21:43:01
-    Minimum : 1.0% at 2026-11-05 21:43:01
+    Maximum : 1.0% at 2026-11-05 21:50:56
+    Minimum : 1.0% at 2026-11-05 21:50:56
   [Samples]
     Data Points: 10 samples
 

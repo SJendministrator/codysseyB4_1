@@ -1,17 +1,17 @@
 # 서버 환경
-# 수집: 2026-11-05 21:50:55 KST  host: agent-server
+# 수집: 2026-11-05 21:56:13 KST  host: agent-server
 
 $ uname -a
 Linux agent-server 7.0.14-orbstack-00380-ga7e0a2dc9535 #1 SMP PREEMPT Fri Aug  7 03:48:40 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
 
-$ bash -c grep PRETTY_NAME /etc/os-release; echo cores: $(nproc); timedatectl | grep 'Time zone'
+$ grep PRETTY_NAME /etc/os-release; echo cores: $(nproc); timedatectl | grep 'Time zone'
 PRETTY_NAME="Ubuntu 22.04.5 LTS"
 cores: 5
                 Time zone: Asia/Seoul (KST, +0900)
 
 $ free -h
                total        used        free      shared  buff/cache   available
-Mem:            15Gi       624Mi        14Gi        24Mi       289Mi        14Gi
+Mem:            15Gi       535Mi        14Gi        24Mi       262Mi        14Gi
 Swap:           16Gi          0B        16Gi
 
 $ df -h /

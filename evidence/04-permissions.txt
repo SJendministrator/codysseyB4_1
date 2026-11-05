@@ -1,13 +1,13 @@
 # 디렉터리 구조와 권한
-# 수집: 2026-11-05 21:50:55 KST  host: agent-server
+# 수집: 2026-11-05 21:56:13 KST  host: agent-server
 
 $ ls -ld /home/agent-admin /home/agent-admin/agent-app /home/agent-admin/agent-app/upload_files /home/agent-admin/agent-app/api_keys /home/agent-admin/agent-app/bin /var/log/agent-app
 drwxr-x---+ 1 agent-admin agent-admin   72 Nov  5 21:18 /home/agent-admin
 drwxr-s---  1 agent-admin agent-common  84 Nov  5 21:35 /home/agent-admin/agent-app
 drwxrws---+ 1 agent-admin agent-core    44 Nov  5 21:42 /home/agent-admin/agent-app/api_keys
-drwxr-s---  1 agent-dev   agent-core    70 Nov  5 21:50 /home/agent-admin/agent-app/bin
-drwxrws---+ 1 agent-admin agent-common   0 Nov  5 21:44 /home/agent-admin/agent-app/upload_files
-drwxrws---+ 1 agent-admin agent-core   102 Nov  5 21:44 /var/log/agent-app
+drwxr-s---  1 agent-dev   agent-core    70 Nov  5 21:55 /home/agent-admin/agent-app/bin
+drwxrws---+ 1 agent-admin agent-common   0 Nov  5 21:50 /home/agent-admin/agent-app/upload_files
+drwxrws---+ 1 agent-admin agent-core   102 Nov  5 21:52 /var/log/agent-app
 
 $ ls -l /home/agent-admin/agent-app/api_keys /home/agent-admin/agent-app/bin
 /home/agent-admin/agent-app/api_keys:
@@ -17,9 +17,9 @@ lrwxrwxrwx  1 agent-admin agent-core 10 Nov  5 21:42 t_secret.key -> secret.key
 
 /home/agent-admin/agent-app/bin:
 total 24
--rwxr-x--- 1 agent-dev agent-core 4539 Nov  5 21:50 log_retention.sh
--rwxr-x--- 1 agent-dev agent-core 8465 Nov  5 21:50 monitor.sh
--rwxr-x--- 1 agent-dev agent-core 3704 Nov  5 21:50 report.sh
+-rwxr-x--- 1 agent-dev agent-core 4539 Nov  5 21:55 log_retention.sh
+-rwxr-x--- 1 agent-dev agent-core 8734 Nov  5 21:55 monitor.sh
+-rwxr-x--- 1 agent-dev agent-core 3704 Nov  5 21:55 report.sh
 
 $ getfacl -p /home/agent-admin /home/agent-admin/agent-app/upload_files /home/agent-admin/agent-app/api_keys /var/log/agent-app
 # file: /home/agent-admin

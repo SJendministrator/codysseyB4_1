@@ -1,14 +1,14 @@
 # 환경 변수, 키 파일, 앱 부팅, 포트 LISTEN
-# 수집: 2026-11-05 21:50:55 KST  host: agent-server
+# 수집: 2026-11-05 21:56:14 KST  host: agent-server
 
-$ runuser -l agent-admin -c env | grep ^AGENT_ | sort
+$ runuser -l agent-admin -c 'env | grep ^AGENT_ | sort'
 AGENT_HOME=/home/agent-admin/agent-app
 AGENT_KEY_PATH=/home/agent-admin/agent-app/api_keys
 AGENT_LOG_DIR=/var/log/agent-app
 AGENT_PORT=15034
 AGENT_UPLOAD_DIR=/home/agent-admin/agent-app/upload_files
 
-$ bash -c ls -l '/home/agent-admin/agent-app/api_keys'; cat '/home/agent-admin/agent-app/api_keys/secret.key'
+$ ls -l '/home/agent-admin/agent-app/api_keys'; cat '/home/agent-admin/agent-app/api_keys/secret.key'
 total 8
 -rw-r-----+ 1 agent-admin agent-core 19 Nov  5 21:42 secret.key
 lrwxrwxrwx  1 agent-admin agent-core 10 Nov  5 21:42 t_secret.key -> secret.key
@@ -38,11 +38,11 @@ Agent READY
 2026-11-05 21:41:05,889 [INFO] [CPU] Occupy core for 1s (Level 1)
 2026-11-05 21:41:07,897 [INFO] --- Step Info: Mode=UP, CPU Lv=2, Mem=25MB ---
 
-(이후 372줄은 앱 동작 로그 — 전체: /tmp/agent-boot.log)
-$ bash -c ps -o user,pid,ppid,cmd -e | grep -E '[a]gent-app-linux|[a]gent_app\.py'
+(이후 576줄은 앱 동작 로그 — 전체: /tmp/agent-boot.log)
+$ ps -o user,pid,ppid,cmd -e | grep -E '[a]gent-app-linux|[a]gent_app\.py'
 agent-a+    5230    5213 /home/agent-admin/agent-app/agent-app-linux-x86
 agent-a+    5232    5230 /home/agent-admin/agent-app/agent-app-linux-x86
 
-$ bash -c ss -tlnp | grep ':15034'
+$ ss -tlnp | grep ':15034'
 LISTEN 0      1            0.0.0.0:15034      0.0.0.0:*    users:(("agent-app-linux",pid=5232,fd=4))
 
