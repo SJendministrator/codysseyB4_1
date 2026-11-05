@@ -18,3 +18,4 @@ require_root() {
 
 # shellcheck source=../config/agent-app.env
 source "$REPO_ROOT/config/agent-app.env"
+KEY_FILE="$AGENT_KEY_PATH/t_secret.key"

@@ -17,12 +17,12 @@ step "환경 변수 등록: /etc/profile.d/agent-app.sh"
 run install -o root -g root -m 644 "$REPO_ROOT/config/agent-app.env" /etc/profile.d/agent-app.sh
 sed 's/^/    /' /etc/profile.d/agent-app.sh | grep export
 
-step "키 파일 생성: $AGENT_KEY_PATH"
-printf 'agent_api_key_test\n' > "$AGENT_KEY_PATH"
-chown agent-admin:agent-core "$AGENT_KEY_PATH"
-chmod 640 "$AGENT_KEY_PATH"
-ls -l "$AGENT_KEY_PATH" | sed 's/^/    /'
-echo "    내용: $(cat "$AGENT_KEY_PATH")  ($(wc -l < "$AGENT_KEY_PATH")줄)"
+step "키 파일 생성: $KEY_FILE"
+printf 'agent_api_key_test\n' > "$KEY_FILE"
+chown agent-admin:agent-core "$KEY_FILE"
+chmod 640 "$KEY_FILE"
+ls -l "$KEY_FILE" | sed 's/^/    /'
+echo "    내용: $(cat "$KEY_FILE")  ($(wc -l < "$KEY_FILE")줄)"
 
 if [ -n "$APP_SRC" ]; then
     step "앱 바이너리 배치"
@@ -43,7 +43,7 @@ runuser -l agent-admin -c 'env | grep ^AGENT_ | sort' | sed 's/^/    /'
 for v in AGENT_HOME AGENT_PORT AGENT_UPLOAD_DIR AGENT_KEY_PATH AGENT_LOG_DIR; do
     runuser -l agent-admin -c "[ -n \"\${$v:-}\" ]" || die "$v 가 agent-admin 셸에 없습니다"
 done
-runuser -u agent-admin -- test -r "$AGENT_KEY_PATH" || die "agent-admin 이 키 파일을 읽을 수 없습니다"
+runuser -u agent-admin -- test -r "$KEY_FILE" || die "agent-admin 이 키 파일을 읽을 수 없습니다"
 runuser -u agent-admin -- test -w "$AGENT_LOG_DIR"  || die "agent-admin 이 로그 디렉터리에 쓸 수 없습니다"
 ok "환경 변수 5개, 키 파일 읽기, 로그 디렉터리 쓰기 확인"
 

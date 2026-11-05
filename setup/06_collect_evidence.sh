@@ -54,7 +54,7 @@ cap 04-permissions.txt getfacl -p /home/agent-admin "$AGENT_UPLOAD_DIR" "$AGENT_
 step "5. 환경 변수 + 앱 Boot Sequence"
 new 05-app-boot.txt "환경 변수, 키 파일, 앱 부팅, 포트 LISTEN"
 cap 05-app-boot.txt runuser -l agent-admin -c 'env | grep ^AGENT_ | sort'
-cap 05-app-boot.txt bash -c "ls -l '$AGENT_KEY_PATH'; cat '$AGENT_KEY_PATH'"
+cap 05-app-boot.txt bash -c "ls -l '$KEY_FILE'; cat '$KEY_FILE'"
 if [ -s "$BOOT_LOG" ]; then
     cap 05-app-boot.txt cat "$BOOT_LOG"
 else
