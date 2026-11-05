@@ -48,7 +48,7 @@ for g in "${!GROUP_MEMBERS[@]}"; do
     done
 done
 # agent-test 가 agent-core 에 실수로 들어가 있으면 제거 (최소 권한)
-if id -nG agent-test | tr ' ' '\n' | grep -qx agent-core; then
+if [[ " $(id -nG agent-test) " == *" agent-core "* ]]; then
     run gpasswd -d agent-test agent-core
 fi
 for u in "${USERS[@]}"; do echo "    $(id "$u")"; done

@@ -18,7 +18,7 @@ if ! command -v ufw >/dev/null 2>&1; then
     run apt-get update -qq
     run apt-get install -y -qq ufw
 fi
-ok "ufw: $(ufw version | head -1)"
+ver="$(ufw version)"; ok "ufw: ${ver%%$'\n'*}"
 
 step "규칙 초기화 (이전에 열어둔 22 등 남은 규칙 제거)"
 run ufw --force reset >/dev/null
@@ -40,7 +40,8 @@ fi
 step "검증 (ufw status verbose)"
 ufw status verbose | sed 's/^/    /'
 
-ufw status | grep -q '^Status: active' || die "ufw 가 비활성 상태입니다"
+status="$(ufw status)"
+grep -q '^Status: active' <<< "$status" || die "ufw 가 비활성 상태입니다"
 # 허용된 포트 목록이 정확히 두 개인지 (IPv4/IPv6 중복 제거)
 allowed=$(ufw status | awk '/ALLOW/ {print $1}' | sed 's/ (v6)//' | sort -u | tr '\n' ' ')
 expected=$(printf '%s\n' "${ALLOW_PORTS[@]}" | sort -u | tr '\n' ' ')

@@ -66,7 +66,11 @@ sshd -T 2>/dev/null | grep -E '^(port|permitrootlogin) ' | sed 's/^/    /'
 echo "  [LISTEN 상태: ss -tulnp]"
 ss -tulnp | grep -E "sshd|:${SSH_PORT}\b" | sed 's/^/    /' || true
 
-sshd -T 2>/dev/null | grep -qx "port ${SSH_PORT}"       || die "포트가 ${SSH_PORT} 가 아닙니다"
-sshd -T 2>/dev/null | grep -qx "permitrootlogin no"     || die "PermitRootLogin 이 no 가 아닙니다"
-ss -tln | grep -q ":${SSH_PORT}\b"                       || die "${SSH_PORT} 포트가 LISTEN 상태가 아닙니다"
+# 출력을 변수에 먼저 받는다. `cmd | grep -q` 는 grep 이 먼저 끝나면 cmd 가 SIGPIPE 로
+# 끊기고, pipefail 아래에서는 "찾았는데도 실패"로 판정된다.
+effective="$(sshd -T 2>/dev/null)"
+listening="$(ss -tln)"
+grep -qx "port ${SSH_PORT}"   <<< "$effective" || die "포트가 ${SSH_PORT} 가 아닙니다"
+grep -qx "permitrootlogin no" <<< "$effective" || die "PermitRootLogin 이 no 가 아닙니다"
+grep -q ":${SSH_PORT}\b"      <<< "$listening" || die "${SSH_PORT} 포트가 LISTEN 상태가 아닙니다"
 ok "SSH: ${SSH_PORT}/tcp LISTEN, root 원격 로그인 차단"
