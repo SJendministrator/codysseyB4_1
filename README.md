@@ -51,9 +51,13 @@ Docker 컨테이너에는 systemd 가 없어 sshd · cron · ufw 가 서비스�
 orb create ubuntu:jammy agent-server
 orb -m agent-server
 
-# 머신 안
+# macOS 에서 레포 받기 (맥에는 git 이 이미 있음)
+cd ~ && git clone https://github.com/SJendministrator/codysseyB4_1.git
+
+# 머신 안 (프롬프트가 user@agent-server 인지 확인)
+cd /Users/<맥 사용자>/codysseyB4_1              # 맥 폴더가 같은 경로로 보인다
+sudo apt-get install -y -qq git                 # 머신 안에서 git pull 하려면 (맥과 별개)
 sudo timedatectl set-timezone Asia/Seoul        # 로그 시각을 한국 시간으로
-cd ~ && git clone https://github.com/SJendministrator/codysseyB4_1.git && cd codysseyB4_1
 ```
 
 ### 1~3. 보안 · 계정 · 권한
@@ -111,12 +115,12 @@ sudo ./setup/06_collect_evidence.sh
 | 설계 포인트 | 이유 |
 |---|---|
 | `/etc/profile.d/agent-app.sh` 를 스크립트가 직접 읽음 | cron 은 로그인 셸이 아니라 환경 변수가 비어 있다 |
-| 방화벽은 일반 계정일 때 `/etc/ufw/ufw.conf` + `systemctl is-active ufw` 로 판단 | `ufw status` 는 root 전용. sudo 를 시도하면 매분 보안 로그에 경고가 쌓인다 |
+| 방화벽은 일반 계정일 때 `/etc/ufw/ufw.conf` 의 `ENABLED=yes` + `ufw.service` 활성/부팅 시 자동 시작으로 판단 | `ufw status` 는 root 전용. sudo 를 시도하면 매분 보안 로그에 경고가 쌓인다. `ufw.service` 는 부팅 때 한 번 실행되고 끝나는 서비스라 `ufw enable` 직후엔 `is-active` 가 inactive 로 나온다 (실제로 이것 때문에 오탐이 났다) |
 | 프로세스는 명령줄 **맨 앞**이 앱일 때만 인정 | 그냥 이름으로 찾으면 `vim agent-app-...` 같은 프로세스도 잡힌다 |
 | 대표 PID = 15034 를 실제로 LISTEN 하는 프로세스 | PyInstaller 앱은 부모·자식 2개로 뜬다 |
 | CPU 는 `/proc/stat` 을 1초 간격으로 두 번 읽어 계산 | 한 번만 읽으면 부팅 이후 평균이 나온다 |
 | MEM 은 `MemAvailable` 기준 | 캐시는 필요하면 바로 비울 수 있어 사용 중으로 보지 않는다 |
-| `flock` 으로 동시 실행 방지 | 이전 회차가 늦게 끝나 겹치면 로그 회전이 꼬일 수 있다 |
+| `flock -w 10` 으로 동시 실행 방지 | 겹쳐 실행되면 로그 회전이 꼬일 수 있다. 바로 포기하지 않고 최대 10초 기다려 회차를 빠뜨리지 않는다 |
 | 회전 파일명을 `monitor.<시각>.log` 로 | 보존 정책(`*.log` 7일 경과 압축)과 자연스럽게 이어진다 |
 
 ## 테스트 (가짜 앱으로 사전 검증)
@@ -127,7 +131,7 @@ sudo ./setup/06_collect_evidence.sh
 | 프로세스는 있는데 포트 미LISTEN | `[FAIL] not listening`, exit 1 |
 | 정상 | 로그 1줄 추가, exit 0 |
 | cron 과 같은 빈 환경(`env -i`) | 정상 동작 (환경 변수 자체 로드) |
-| 동시 실행 | 두 번째 실행은 건너뜀 |
+| 동시 실행 | 두 번째 실행은 앞 회차가 끝날 때까지 기다렸다가 정상 실행 |
 | monitor.log 10MB + 회전 파일 12개 | 회전 후 총 10개만 유지 (오래된 것부터 삭제) |
 | agent-test 로 실행 | Permission denied (750) |
 | 보존 정책: 7일 지난 로그 / 30일 지난 아카이브 / 권한 없음 / 대상 0개 | 압축·이동 / 삭제 / 원본 유지하고 오류 / 안내 후 정상 종료 |

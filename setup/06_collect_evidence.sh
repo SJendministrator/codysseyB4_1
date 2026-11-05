@@ -18,7 +18,11 @@ BOOT_LOG="${BOOT_LOG:-/tmp/agent-boot.log}"
 cap() {
     local f="$OUT/$1"; shift
     # 증거 수집은 명령이 실패해도 멈추지 않고 종료 코드까지 기록한다 (set -e 무력화)
-    { echo "\$ $*"; local rc=0; "$@" 2>&1 || rc=$?; [ "$rc" -eq 0 ] || echo "(exit code: $rc)"; echo; } >> "$f"
+    # 기록용 명령 문자열: `bash -c "..."` 는 안쪽 명령만, 공백 있는 인자는 따옴표로 감싼다
+    local shown="" a
+    if [ "$1" = bash ] && [ "${2:-}" = -c ]; then shown="$3"
+    else for a in "$@"; do [[ "$a" == *" "* ]] && shown+=" '$a'" || shown+=" $a"; done; shown="${shown# }"; fi
+    { echo "\$ $shown"; local rc=0; "$@" 2>&1 || rc=$?; [ "$rc" -eq 0 ] || echo "(exit code: $rc)"; echo; } >> "$f"
 }
 new() { local f="$OUT/$1"; : > "$f"; echo "# $2" >> "$f"; echo "# 수집: $(date '+%Y-%m-%d %H:%M:%S %Z')  host: $(hostname)" >> "$f"; echo >> "$f"; echo "  -> evidence/$1"; }
 

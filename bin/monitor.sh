@@ -110,9 +110,11 @@ if command -v ufw >/dev/null 2>&1; then
     else
         # 일반 계정(cron)은 'ufw status'를 못 쓴다(root 필요).
         # sudo 를 시도하면 권한 없는 계정은 매분 auth.log 에 경고가 쌓이므로 쓰지 않고,
-        # 누구나 읽을 수 있는 설정 파일(ENABLED=yes) + 서비스 상태로 판단한다.
+        # 누구나 읽을 수 있는 설정 파일(ENABLED=yes) + 서비스 설정으로 판단한다.
+        # ufw.service 는 부팅 때 규칙을 한 번 올리고 끝나는 oneshot 이라, `ufw enable` 직후
+        # (재부팅 전)에는 is-active 가 inactive 로 나온다 → is-enabled 도 인정한다.
         if grep -qiE '^ENABLED=yes' /etc/ufw/ufw.conf 2>/dev/null \
-           && systemctl is-active --quiet ufw 2>/dev/null; then
+           && { systemctl is-active --quiet ufw 2>/dev/null || systemctl is-enabled --quiet ufw 2>/dev/null; }; then
             fw_state=active
         else
             fw_state=inactive
