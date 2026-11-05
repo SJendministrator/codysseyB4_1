@@ -1,5 +1,5 @@
 # SSH 설정
-# 수집: 2026-11-05 21:44:02 KST  host: agent-server
+# 수집: 2026-11-05 21:50:55 KST  host: agent-server
 
 $ grep -nE ^(Port|PermitRootLogin)[[:space:]] /etc/ssh/sshd_config
 14:Port 20022

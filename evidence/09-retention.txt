@@ -1,0 +1,51 @@
+# log_retention.sh 보존 정책 시연
+# 수집: 2026-11-05 21:52:07 KST  host: agent-server
+
+# 시연용 파일 준비 (agent-admin 으로 생성, 수정 시각만 과거로)
+#   demo-old.log      : 8일 전  → 압축·이동 대상
+#   demo-new.log      : 지금    → 대상 아님
+#   demo-expired.log.gz: 31일 전 → 아카이브 삭제 대상
+$ ls -l --time-style=long-iso /var/log/agent-app /var/log/monitor/agent-app/archive
+/var/log/agent-app:
+total 44
+-rw-rw----+ 1 agent-admin agent-core 31934 2026-11-05 21:52 agent_app.log
+-rw-rw----+ 1 agent-admin agent-core     0 2026-11-05 21:43 cron-error.log
+-rw-rw----+ 1 agent-admin agent-core     5 2026-11-05 21:52 demo-new.log
+-rw-rw----+ 1 agent-admin agent-core     5 2026-10-28 21:52 demo-old.log
+-rw-rw----+ 1 agent-admin agent-core   806 2026-11-05 21:52 monitor.log
+
+/var/log/monitor/agent-app/archive:
+total 4
+-rw-rw---- 1 agent-admin agent-core 25 2026-10-05 21:52 demo-expired.log.gz
+
+$ runuser -u agent-admin -- /home/agent-admin/agent-app/bin/log_retention.sh --dry-run
+[2026-11-05 21:52:07] [INFO] dry-run: 실제로 바꾸지 않고 대상만 출력합니다
+[2026-11-05 21:52:07] [INFO] 정책: 7일 경과 *.log 압축·이동, 30일 경과 아카이브 삭제
+    (dry-run) gzip /var/log/agent-app/demo-old.log -> /var/log/monitor/agent-app/archive/demo-old.log.gz
+    (dry-run) 삭제 예정: /var/log/monitor/agent-app/archive/demo-expired.log.gz
+[2026-11-05 21:52:07] [INFO] 완료
+
+$ runuser -u agent-admin -- /home/agent-admin/agent-app/bin/log_retention.sh
+[2026-11-05 21:52:07] [INFO] 정책: 7일 경과 *.log 압축·이동, 30일 경과 아카이브 삭제
+[2026-11-05 21:52:07] [INFO] 압축·이동: /var/log/agent-app/demo-old.log -> /var/log/monitor/agent-app/archive/demo-old.log.gz (38 bytes)
+[2026-11-05 21:52:07] [INFO] 삭제: /var/log/monitor/agent-app/archive/demo-expired.log.gz
+[2026-11-05 21:52:07] [INFO] 완료
+
+$ ls -l --time-style=long-iso /var/log/agent-app /var/log/monitor/agent-app/archive
+/var/log/agent-app:
+total 40
+-rw-rw----+ 1 agent-admin agent-core 31934 2026-11-05 21:52 agent_app.log
+-rw-rw----+ 1 agent-admin agent-core     0 2026-11-05 21:43 cron-error.log
+-rw-rw----+ 1 agent-admin agent-core     5 2026-11-05 21:52 demo-new.log
+-rw-rw----+ 1 agent-admin agent-core   806 2026-11-05 21:52 monitor.log
+
+/var/log/monitor/agent-app/archive:
+total 4
+-rw-rw---- 1 agent-admin agent-core 38 2026-11-05 21:52 demo-old.log.gz
+
+$ runuser -u agent-admin -- /home/agent-admin/agent-app/bin/log_retention.sh
+[2026-11-05 21:52:07] [INFO] 정책: 7일 경과 *.log 압축·이동, 30일 경과 아카이브 삭제
+[2026-11-05 21:52:07] [INFO] 압축 대상 없음 (7일 이상 지난 *.log 0개)
+[2026-11-05 21:52:07] [INFO] 삭제 대상 없음 (30일 이상 지난 아카이브 0개)
+[2026-11-05 21:52:07] [INFO] 완료
+

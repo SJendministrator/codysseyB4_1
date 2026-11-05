@@ -1,0 +1,39 @@
+# report.sh 통계 리포트
+# 수집: 2026-11-05 21:52:07 KST  host: agent-server
+
+$ runuser -u agent-admin -- /home/agent-admin/agent-app/bin/report.sh
+====== STATISTICS REPORT ======
+  Range   : 2026-11-05 21:42:26 ~ 2026-11-05 21:52:01
+  [CPU]
+    Average : 3.2%
+    Maximum : 6.0% at 2026-11-05 21:44:01
+    Minimum : 1.0% at 2026-11-05 21:45:01
+  [Memory]
+    Average : 5.6%
+    Maximum : 6.1% at 2026-11-05 21:44:01
+    Minimum : 4.6% at 2026-11-05 21:48:01
+  [Disk]
+    Average : 1.0%
+    Maximum : 1.0% at 2026-11-05 21:42:26
+    Minimum : 1.0% at 2026-11-05 21:42:26
+  [Samples]
+    Data Points: 13 samples
+
+$ runuser -u agent-admin -- /home/agent-admin/agent-app/bin/report.sh --from 2026-11-05 21:42:26 --to 2026-11-05 21:52:01 --last 3
+====== STATISTICS REPORT ======
+  Range   : 2026-11-05 21:50:56 ~ 2026-11-05 21:52:01
+  [CPU]
+    Average : 3.4%
+    Maximum : 3.7% at 2026-11-05 21:52:01
+    Minimum : 2.9% at 2026-11-05 21:51:01
+  [Memory]
+    Average : 5.9%
+    Maximum : 5.9% at 2026-11-05 21:51:01
+    Minimum : 5.8% at 2026-11-05 21:50:56
+  [Disk]
+    Average : 1.0%
+    Maximum : 1.0% at 2026-11-05 21:50:56
+    Minimum : 1.0% at 2026-11-05 21:50:56
+  [Samples]
+    Data Points: 3 samples
+

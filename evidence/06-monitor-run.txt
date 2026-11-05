@@ -1,7 +1,83 @@
 # monitor.sh 수동 실행
-# 수집: 2026-11-05 21:44:02 KST  host: agent-server
+# 수집: 2026-11-05 21:50:55 KST  host: agent-server
 
-$ runuser -u agent-admin -- /home/agent-admin/agent-app/bin/monitor.sh
-[INFO] 이전 monitor.sh 가 아직 실행 중이라 이번 회차는 건너뜁니다.
+$ sudo -u agent-admin /home/agent-admin/agent-app/bin/monitor.sh
+====== SYSTEM MONITOR RESULT ======
 
-exit code: 0
+[HEALTH CHECK]
+Checking process 'agent-app-linux'... [OK] (PID: 5232, all: 5230 5232)
+Checking port 15034... [OK] (LISTEN 0.0.0.0:15034)
+
+[FIREWALL]
+Firewall (ufw)... inactive
+[WARNING] Firewall is not active (ufw: inactive)
+
+[RESOURCE MONITORING]
+CPU Usage  : 3.6%
+MEM Usage  : 5.8%
+DISK Used  : 1%
+
+====== STATISTICS REPORT ======
+  Range   : 2026-11-05 21:42:26 ~ 2026-11-05 21:50:55
+  [CPU]
+    Average : 3.2%
+    Maximum : 6.0% at 2026-11-05 21:44:01
+    Minimum : 1.0% at 2026-11-05 21:45:01
+  [Memory]
+    Average : 5.5%
+    Maximum : 6.1% at 2026-11-05 21:44:01
+    Minimum : 4.6% at 2026-11-05 21:48:01
+  [Disk]
+    Average : 1.0%
+    Maximum : 1.0% at 2026-11-05 21:42:26
+    Minimum : 1.0% at 2026-11-05 21:42:26
+  [Samples]
+    Data Points: 10 samples
+
+[INFO] Log appended: /var/log/agent-app/monitor.log
+(exit code: 0)
+
+# ---------------------------------------------------------------
+# 경고 동작 시연: 앱 부하는 주기적으로 오르내리고(코어 5개 중 1개 점유) 측정 시점에 따라
+# 임계값 아래일 수 있다. 경고 로직 확인을 위해 임계값만 낮춰 1회 실행한다.
+# (기본값은 그대로이며 cron 실행에는 영향 없음)
+# ---------------------------------------------------------------
+$ sudo -u agent-admin env CPU_WARN=0 MEM_WARN=1 DISK_WARN=0 /home/agent-admin/agent-app/bin/monitor.sh
+====== SYSTEM MONITOR RESULT ======
+
+[HEALTH CHECK]
+Checking process 'agent-app-linux'... [OK] (PID: 5232, all: 5230 5232)
+Checking port 15034... [OK] (LISTEN 0.0.0.0:15034)
+
+[FIREWALL]
+Firewall (ufw)... inactive
+[WARNING] Firewall is not active (ufw: inactive)
+
+[RESOURCE MONITORING]
+CPU Usage  : 3.6%
+MEM Usage  : 5.8%
+DISK Used  : 1%
+
+[WARNING] CPU threshold exceeded (3.6% > 0%)
+[WARNING] MEM threshold exceeded (5.8% > 1%)
+[WARNING] DISK threshold exceeded (1% > 0%)
+
+====== STATISTICS REPORT ======
+  Range   : 2026-11-05 21:43:01 ~ 2026-11-05 21:50:56
+  [CPU]
+    Average : 3.2%
+    Maximum : 6.0% at 2026-11-05 21:44:01
+    Minimum : 1.0% at 2026-11-05 21:45:01
+  [Memory]
+    Average : 5.5%
+    Maximum : 6.1% at 2026-11-05 21:44:01
+    Minimum : 4.6% at 2026-11-05 21:48:01
+  [Disk]
+    Average : 1.0%
+    Maximum : 1.0% at 2026-11-05 21:43:01
+    Minimum : 1.0% at 2026-11-05 21:43:01
+  [Samples]
+    Data Points: 10 samples
+
+[INFO] Log appended: /var/log/agent-app/monitor.log
+(exit code: 0)

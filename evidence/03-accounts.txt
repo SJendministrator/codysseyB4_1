@@ -1,5 +1,5 @@
 # 계정 및 그룹
-# 수집: 2026-11-05 21:44:02 KST  host: agent-server
+# 수집: 2026-11-05 21:50:55 KST  host: agent-server
 
 $ id agent-admin
 uid=1000(agent-admin) gid=1002(agent-admin) groups=1002(agent-admin),1000(agent-common),1001(agent-core)
