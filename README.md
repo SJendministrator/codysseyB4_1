@@ -1,4 +1,4 @@
-# agent-app 운영 환경 구축 · 관제 자동화
+# codysseyB4_1 — agent-app 운영 환경 구축 · 관제 자동화
 
 서버를 운영하는 엔지니어처럼 **보안 기본 설정 → 역할 기반 권한 → 앱 실행 환경 → 관제 스크립트 → 자동 실행**까지 직접 구성하는 미션입니다.
 
@@ -53,7 +53,7 @@ orb -m agent-server
 
 # 머신 안
 sudo timedatectl set-timezone Asia/Seoul        # 로그 시각을 한국 시간으로
-cd /Users/<맥 사용자>/Desktop/<이 레포>
+cd ~ && git clone https://github.com/SJendministrator/codysseyB4_1.git && cd codysseyB4_1
 ```
 
 ### 1~3. 보안 · 계정 · 권한
@@ -67,7 +67,7 @@ sudo ./setup/03_accounts.sh
 ### 4. 앱 실행 환경 → 앱 실행
 
 ```bash
-sudo ./setup/04_app_env.sh /Users/<맥 사용자>/<압축 푼 위치>/agent-app-linux-arm64   # uname -m 이 x86_64 면 x86 파일
+sudo ./setup/04_app_env.sh /Users/<맥 사용자>/<압축 푼 위치>/agent-app-linux-x86   # uname -m 결과에 맞는 파일 (aarch64 면 arm64)
 ```
 
 **새 터미널**을 열어 앱을 일반 계정으로 실행합니다 (root 금지, 종료는 Ctrl+C). 부팅 출력은 증거용으로 파일에도 남깁니다.
@@ -75,7 +75,7 @@ sudo ./setup/04_app_env.sh /Users/<맥 사용자>/<압축 푼 위치>/agent-app-
 ```bash
 orb -m agent-server
 sudo -iu agent-admin
-PYTHONUNBUFFERED=1 $AGENT_HOME/agent-app-linux-arm64 2>&1 | tee /tmp/agent-boot.log
+PYTHONUNBUFFERED=1 $AGENT_HOME/agent-app-linux-* 2>&1 | tee /tmp/agent-boot.log
 ```
 
 > `PYTHONUNBUFFERED=1`: 출력을 파이프(`| tee`)로 보내면 파이썬이 출력을 모아뒀다가 늦게 내보내서 화면에 아무것도 안 보일 수 있습니다. 즉시 출력하게 합니다.
