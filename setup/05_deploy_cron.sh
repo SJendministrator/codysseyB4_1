@@ -42,4 +42,4 @@ step "agent-admin crontab 등록"
 run crontab -u agent-admin "$REPO_ROOT/config/crontab.agent-admin"
 crontab -u agent-admin -l | grep -v '^#' | grep -v '^$' | sed 's/^/    /'
 
-ok "등록 완료. 1~2분 뒤 확인:  tail -n 3 $AGENT_LOG_DIR/monitor.log"
+ok "등록 완료. 1~2분 뒤 확인: tail -n 3 $AGENT_LOG_DIR/monitor.log"
