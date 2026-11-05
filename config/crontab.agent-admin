@@ -1,0 +1,13 @@
+# agent-admin crontab — setup/05_deploy_cron.sh 가 `crontab -u agent-admin` 으로 등록
+#
+# cron 은 로그인 셸이 아니라서 PATH 가 최소한이고 /etc/profile.d 도 읽지 않는다.
+# 그래서 SHELL/PATH 를 여기서 지정하고, AGENT_* 값은 monitor.sh 가 직접 불러온다.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# 매분: 상태 수집 → /var/log/agent-app/monitor.log
+#   콘솔 출력(매분 20줄)은 버리고, 스크립트 자체 에러(stderr)만 따로 남긴다.
+* * * * * /home/agent-admin/agent-app/bin/monitor.sh > /dev/null 2>> /var/log/agent-app/cron-error.log
+
+# (보너스 2) 매일 03:10: 7일 지난 로그 압축·아카이브, 30일 지난 아카이브 삭제
+10 3 * * * /home/agent-admin/agent-app/bin/log_retention.sh >> /var/log/monitor/agent-app/retention.log 2>&1
