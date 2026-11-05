@@ -21,6 +21,9 @@ step "키 파일 생성: $KEY_FILE"
 printf 'agent_api_key_test\n' > "$KEY_FILE"
 chown agent-admin:agent-core "$KEY_FILE"
 chmod 640 "$KEY_FILE"
+ln -sfn "$(basename "$KEY_FILE")" "$KEY_ALIAS"      # 문서상 이름 → 실제 파일
+chown -h agent-admin:agent-core "$KEY_ALIAS"
+ls -l "$KEY_ALIAS" | sed 's/^/    /'
 ls -l "$KEY_FILE" | sed 's/^/    /'
 echo "    내용: $(cat "$KEY_FILE")  ($(wc -l < "$KEY_FILE")줄)"
 

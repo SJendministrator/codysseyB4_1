@@ -19,4 +19,7 @@ require_root() {
 # shellcheck source=../config/agent-app.env
 source "$REPO_ROOT/config/agent-app.env"
 # shellcheck disable=SC2034  # 이 파일을 source 하는 스크립트들이 사용
-KEY_FILE="$AGENT_KEY_PATH/t_secret.key"
+# 제공 앱은 secret.key 를 찾는다: [3/5] Missing File: secret.key
+# 미션 문서의 이름(t_secret.key)은 같은 파일을 가리키는 심볼릭 링크로 함께 둔다.
+KEY_FILE="$AGENT_KEY_PATH/secret.key"
+KEY_ALIAS="$AGENT_KEY_PATH/t_secret.key"
