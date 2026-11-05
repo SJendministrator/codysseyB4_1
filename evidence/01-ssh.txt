@@ -1,0 +1,15 @@
+# SSH 설정
+# 수집: 2026-11-05 21:44:02 KST  host: agent-server
+
+$ grep -nE ^(Port|PermitRootLogin)[[:space:]] /etc/ssh/sshd_config
+14:Port 20022
+33:PermitRootLogin no
+
+$ bash -c sshd -T | grep -E '^(port|permitrootlogin) '
+port 20022
+permitrootlogin no
+
+$ bash -c ss -tulnp | grep -E 'sshd|:20022'
+tcp   LISTEN 0      128                 0.0.0.0:20022      0.0.0.0:*    users:(("sshd",pid=5269,fd=3))           
+tcp   LISTEN 0      128                    [::]:20022         [::]:*    users:(("sshd",pid=5269,fd=4))           
+

@@ -1,0 +1,92 @@
+# 디렉터리 구조와 권한
+# 수집: 2026-11-05 21:44:02 KST  host: agent-server
+
+$ ls -ld /home/agent-admin /home/agent-admin/agent-app /home/agent-admin/agent-app/upload_files /home/agent-admin/agent-app/api_keys /home/agent-admin/agent-app/bin /var/log/agent-app
+drwxr-x---+ 1 agent-admin agent-admin   72 Nov  5 21:18 /home/agent-admin
+drwxr-s---  1 agent-admin agent-common  84 Nov  5 21:35 /home/agent-admin/agent-app
+drwxrws---+ 1 agent-admin agent-core    44 Nov  5 21:42 /home/agent-admin/agent-app/api_keys
+drwxr-s---  1 agent-dev   agent-core    70 Nov  5 21:42 /home/agent-admin/agent-app/bin
+drwxrws---+ 1 agent-admin agent-common   0 Nov  5 21:31 /home/agent-admin/agent-app/upload_files
+drwxrws---+ 1 agent-admin agent-core   102 Nov  5 21:43 /var/log/agent-app
+
+$ ls -l /home/agent-admin/agent-app/api_keys /home/agent-admin/agent-app/bin
+/home/agent-admin/agent-app/api_keys:
+total 8
+-rw-r-----+ 1 agent-admin agent-core 19 Nov  5 21:42 secret.key
+lrwxrwxrwx  1 agent-admin agent-core 10 Nov  5 21:42 t_secret.key -> secret.key
+
+/home/agent-admin/agent-app/bin:
+total 24
+-rwxr-x--- 1 agent-dev agent-core 4537 Nov  5 21:42 log_retention.sh
+-rwxr-x--- 1 agent-dev agent-core 8246 Nov  5 21:42 monitor.sh
+-rwxr-x--- 1 agent-dev agent-core 3704 Nov  5 21:42 report.sh
+
+$ getfacl -p /home/agent-admin /home/agent-admin/agent-app/upload_files /home/agent-admin/agent-app/api_keys /var/log/agent-app
+# file: /home/agent-admin
+# owner: agent-admin
+# group: agent-admin
+user::rwx
+group::r-x
+group:agent-common:--x
+mask::r-x
+other::---
+
+# file: /home/agent-admin/agent-app/upload_files
+# owner: agent-admin
+# group: agent-common
+# flags: -s-
+user::rwx
+group::rwx
+group:agent-common:rwx
+mask::rwx
+other::---
+default:user::rwx
+default:group::rwx
+default:group:agent-common:rwx
+default:mask::rwx
+default:other::---
+
+# file: /home/agent-admin/agent-app/api_keys
+# owner: agent-admin
+# group: agent-core
+# flags: -s-
+user::rwx
+group::rwx
+group:agent-core:rwx
+mask::rwx
+other::---
+default:user::rwx
+default:group::rwx
+default:group:agent-core:rwx
+default:mask::rwx
+default:other::---
+
+# file: /var/log/agent-app
+# owner: agent-admin
+# group: agent-core
+# flags: -s-
+user::rwx
+group::rwx
+group:agent-core:rwx
+mask::rwx
+other::---
+default:user::rwx
+default:group::rwx
+default:group:agent-core:rwx
+default:mask::rwx
+default:other::---
+
+
+# 실제 접근 테스트 (각 계정으로 시도)
+agent-admin  ALLOW  upload_files 쓰기
+agent-dev    ALLOW  upload_files 쓰기
+agent-test   ALLOW  upload_files 쓰기
+agent-admin  ALLOW  api_keys 읽기
+agent-dev    ALLOW  api_keys 읽기
+agent-test   DENY   api_keys 읽기
+agent-admin  ALLOW  로그 디렉터리 쓰기
+agent-dev    ALLOW  로그 디렉터리 쓰기
+agent-test   DENY   로그 디렉터리 쓰기
+agent-admin  ALLOW  monitor.sh 실행 권한
+agent-dev    ALLOW  monitor.sh 실행 권한
+agent-test   DENY   monitor.sh 실행 권한

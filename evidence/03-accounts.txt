@@ -1,0 +1,16 @@
+# 계정 및 그룹
+# 수집: 2026-11-05 21:44:02 KST  host: agent-server
+
+$ id agent-admin
+uid=1000(agent-admin) gid=1002(agent-admin) groups=1002(agent-admin),1000(agent-common),1001(agent-core)
+
+$ id agent-dev
+uid=1001(agent-dev) gid=1003(agent-dev) groups=1003(agent-dev),1000(agent-common),1001(agent-core)
+
+$ id agent-test
+uid=1002(agent-test) gid=1004(agent-test) groups=1004(agent-test),1000(agent-common)
+
+$ getent group agent-common agent-core
+agent-common:x:1000:agent-admin,agent-dev,agent-test
+agent-core:x:1001:agent-admin,agent-dev
+

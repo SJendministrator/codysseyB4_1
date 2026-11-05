@@ -1,0 +1,7 @@
+# monitor.sh 수동 실행
+# 수집: 2026-11-05 21:44:02 KST  host: agent-server
+
+$ runuser -u agent-admin -- /home/agent-admin/agent-app/bin/monitor.sh
+[INFO] 이전 monitor.sh 가 아직 실행 중이라 이번 회차는 건너뜁니다.
+
+exit code: 0
