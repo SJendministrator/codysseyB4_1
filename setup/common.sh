@@ -18,4 +18,5 @@ require_root() {
 
 # shellcheck source=../config/agent-app.env
 source "$REPO_ROOT/config/agent-app.env"
+# shellcheck disable=SC2034  # 이 파일을 source 하는 스크립트들이 사용
 KEY_FILE="$AGENT_KEY_PATH/t_secret.key"
