@@ -25,7 +25,6 @@ ts()   { date '+%Y-%m-%d %H:%M:%S'; }
 info() { echo "[$(ts)] [INFO] $*"; }
 warn() { echo "[$(ts)] [WARNING] $*"; }
 err()  { echo "[$(ts)] [ERROR] $*" >&2; }
-do_()  { if [ "$DRY" -eq 1 ]; then echo "    (dry-run) $*"; else "$@"; fi; }
 
 [[ "$COMPRESS_DAYS" =~ ^[0-9]+$ && "$DELETE_DAYS" =~ ^[0-9]+$ ]] || { err "일수는 숫자여야 합니다"; exit 1; }
 [ "$DRY" -eq 1 ] && info "dry-run: 실제로 바꾸지 않고 대상만 출력합니다"
@@ -89,7 +88,8 @@ if [ "${#olds[@]}" -eq 0 ]; then
     info "삭제 대상 없음 (${DELETE_DAYS}일 이상 지난 아카이브 0개)"
 fi
 for f in "${olds[@]}"; do
-    if do_ rm -f -- "$f"; then info "삭제: $f"; else warn "삭제 실패(권한?): $f"; fi
+    if [ "$DRY" -eq 1 ]; then echo "    (dry-run) 삭제 예정: $f"; continue; fi
+    if rm -f -- "$f"; then info "삭제: $f"; else warn "삭제 실패(권한?): $f"; fi
 done
 
 info "완료"

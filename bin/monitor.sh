@@ -32,9 +32,10 @@ LOG_FILE="$LOG_DIR/monitor.log"
 # `vim .../agent-app-linux-arm64` 처럼 파일명이 인자로 들어간 다른 프로세스까지 잡힌다.
 APP_PATTERN="${APP_PATTERN:-^([^ ]*/)?(agent-app-linux-[a-z0-9_]+|python3?(\.[0-9]+)? ([^ ]*/)?agent_app\.py)( |$)}"
 
-CPU_WARN=20      # %
-MEM_WARN=10      # %
-DISK_WARN=80     # %
+# 임계값 (%). 환경 변수로 덮어쓸 수 있다 — 경고 동작 시연·테스트용
+CPU_WARN="${CPU_WARN:-20}"
+MEM_WARN="${MEM_WARN:-10}"
+DISK_WARN="${DISK_WARN:-80}"
 MAX_LOG_BYTES=$((10 * 1024 * 1024))   # 10MB
 MAX_LOG_FILES=10                      # monitor.log 포함 총 개수
 
@@ -51,14 +52,15 @@ log_error() {   # Health Check 실패도 운영 추적을 위해 로그에 남�
 }
 
 # ---------- 동시 실행 방지 ----------
-# 이전 회차가 1분 안에 안 끝났을 때 겹쳐 실행되면 로그 회전이 꼬일 수 있다.
+# 이전 회차와 겹쳐 실행되면 로그 회전이 꼬일 수 있다.
+# 한 회차는 2초 남짓이므로 최대 10초 기다려 보고, 그래도 잠겨 있으면 이번 회차를 건너뛴다.
 if [ ! -d "$LOG_DIR" ] || [ ! -w "$LOG_DIR" ]; then
     echo "[ERROR] 로그 디렉터리에 쓸 수 없습니다: $LOG_DIR (user=$(id -un))" >&2
     exit 2
 fi
 exec 9>"$LOG_DIR/.monitor.lock"
-if ! flock -n 9; then
-    echo "[INFO] 이전 monitor.sh 가 아직 실행 중이라 이번 회차는 건너뜁니다."
+if ! flock -w 10 9; then
+    echo "[INFO] 다른 monitor.sh 가 10초 넘게 실행 중이라 이번 회차는 건너뜁니다."
     exit 0
 fi
 

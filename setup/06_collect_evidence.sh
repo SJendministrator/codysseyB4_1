@@ -17,9 +17,17 @@ BOOT_LOG="${BOOT_LOG:-/tmp/agent-boot.log}"
 # cap <파일> <명령...> : 명령과 결과를 같이 저장
 cap() {
     local f="$OUT/$1"; shift
-    { echo "\$ $*"; "$@" 2>&1; echo; } >> "$f"
+    # 증거 수집은 명령이 실패해도 멈추지 않고 종료 코드까지 기록한다 (set -e 무력화)
+    { echo "\$ $*"; local rc=0; "$@" 2>&1 || rc=$?; [ "$rc" -eq 0 ] || echo "(exit code: $rc)"; echo; } >> "$f"
 }
 new() { local f="$OUT/$1"; : > "$f"; echo "# $2" >> "$f"; echo "# 수집: $(date '+%Y-%m-%d %H:%M:%S %Z')  host: $(hostname)" >> "$f"; echo >> "$f"; echo "  -> evidence/$1"; }
+
+step "0. 서버 정보"
+new 00-system.txt "서버 환경"
+cap 00-system.txt uname -a
+cap 00-system.txt bash -c "grep PRETTY_NAME /etc/os-release; echo cores: \$(nproc); timedatectl | grep 'Time zone'"
+cap 00-system.txt free -h
+cap 00-system.txt df -h /
 
 step "1. SSH 포트 20022 + root 원격 로그인 차단"
 new 01-ssh.txt "SSH 설정"
@@ -56,7 +64,8 @@ new 05-app-boot.txt "환경 변수, 키 파일, 앱 부팅, 포트 LISTEN"
 cap 05-app-boot.txt runuser -l agent-admin -c 'env | grep ^AGENT_ | sort'
 cap 05-app-boot.txt bash -c "ls -l '$AGENT_KEY_PATH'; cat '$KEY_FILE'"
 if [ -s "$BOOT_LOG" ]; then
-    cap 05-app-boot.txt cat "$BOOT_LOG"
+    cap 05-app-boot.txt head -n 22 "$BOOT_LOG"
+    echo "(이후 $(($(wc -l < "$BOOT_LOG") - 22))줄은 앱 동작 로그 — 전체: $BOOT_LOG)" >> "$OUT/05-app-boot.txt"
 else
     warn "부팅 로그가 없습니다: $BOOT_LOG  (README 4단계처럼 tee 로 저장해 주세요)"
     echo "(부팅 로그 없음: $BOOT_LOG)" >> "$OUT/05-app-boot.txt"
@@ -66,8 +75,17 @@ cap 05-app-boot.txt bash -c "ss -tlnp | grep ':${AGENT_PORT}'"
 
 step "6. monitor.sh 실행 결과 (agent-admin)"
 new 06-monitor-run.txt "monitor.sh 수동 실행"
-cap 06-monitor-run.txt runuser -u agent-admin -- "$AGENT_HOME/bin/monitor.sh"
-echo "exit code: $(runuser -u agent-admin -- "$AGENT_HOME/bin/monitor.sh" >/dev/null 2>&1; echo $?)" >> "$OUT/06-monitor-run.txt"
+{
+    echo "\$ sudo -u agent-admin $AGENT_HOME/bin/monitor.sh"
+    rc=0; runuser -u agent-admin -- "$AGENT_HOME/bin/monitor.sh" 2>&1 || rc=$?; echo "(exit code: $rc)"; echo
+    echo "# ---------------------------------------------------------------"
+    echo "# 경고 동작 시연: 앱 부하는 주기적으로 오르내리고(코어 $(nproc)개 중 1개 점유) 측정 시점에 따라"
+    echo "# 임계값 아래일 수 있다. 경고 로직 확인을 위해 임계값만 낮춰 1회 실행한다."
+    echo "# (기본값은 그대로이며 cron 실행에는 영향 없음)"
+    echo "# ---------------------------------------------------------------"
+    echo "\$ sudo -u agent-admin env CPU_WARN=0 MEM_WARN=1 DISK_WARN=0 $AGENT_HOME/bin/monitor.sh"
+    rc=0; runuser -u agent-admin -- env CPU_WARN=0 MEM_WARN=1 DISK_WARN=0 "$AGENT_HOME/bin/monitor.sh" 2>&1 || rc=$?; echo "(exit code: $rc)"
+} >> "$OUT/06-monitor-run.txt"
 
 step "7·8. crontab 등록 + 자동 실행 확인 (약 70초 대기)"
 new 07-cron.txt "crontab 등록과 monitor.log 자동 누적"
@@ -81,6 +99,32 @@ after=$(wc -l < "$AGENT_LOG_DIR/monitor.log")
 cap 07-cron.txt bash -c "journalctl -u cron --since '-3 min' --no-pager | grep -i agent-admin | tail -5"
 cap 07-cron.txt ls -l "$AGENT_LOG_DIR"
 [ "$after" -gt "$before" ] && ok "cron 이 monitor.log 에 $((after - before))줄 추가함" || warn "70초 동안 로그가 늘지 않았습니다. cron/앱 상태를 확인하세요"
+
+step "(보너스 1) report.sh"
+new 08-report.txt "report.sh 통계 리포트"
+cap 08-report.txt runuser -u agent-admin -- "$AGENT_HOME/bin/report.sh"
+first=$(sed -nE 's/^\[([0-9-]{10} [0-9:]{8})\] PID:.*/\1/p' "$AGENT_LOG_DIR/monitor.log" | head -1)
+last=$(sed -nE 's/^\[([0-9-]{10} [0-9:]{8})\] PID:.*/\1/p' "$AGENT_LOG_DIR/monitor.log" | tail -1)
+cap 08-report.txt runuser -u agent-admin -- "$AGENT_HOME/bin/report.sh" --from "$first" --to "$last" --last 3
+
+step "(보너스 2) log_retention.sh — 날짜를 조작한 시연용 파일로"
+new 09-retention.txt "log_retention.sh 보존 정책 시연"
+ARCH=/var/log/monitor/agent-app/archive
+{
+    echo "# 시연용 파일 준비 (agent-admin 으로 생성, 수정 시각만 과거로)"
+    echo "#   demo-old.log      : 8일 전  → 압축·이동 대상"
+    echo "#   demo-new.log      : 지금    → 대상 아님"
+    echo "#   demo-expired.log.gz: 31일 전 → 아카이브 삭제 대상"
+} >> "$OUT/09-retention.txt"
+runuser -u agent-admin -- bash -c "echo demo > '$AGENT_LOG_DIR/demo-old.log'; touch -d '8 days ago' '$AGENT_LOG_DIR/demo-old.log'
+  echo demo > '$AGENT_LOG_DIR/demo-new.log'
+  echo demo | gzip > '$ARCH/demo-expired.log.gz'; touch -d '31 days ago' '$ARCH/demo-expired.log.gz'"
+cap 09-retention.txt ls -l --time-style=long-iso "$AGENT_LOG_DIR" "$ARCH"
+cap 09-retention.txt runuser -u agent-admin -- "$AGENT_HOME/bin/log_retention.sh" --dry-run
+cap 09-retention.txt runuser -u agent-admin -- "$AGENT_HOME/bin/log_retention.sh"
+cap 09-retention.txt ls -l --time-style=long-iso "$AGENT_LOG_DIR" "$ARCH"
+cap 09-retention.txt runuser -u agent-admin -- "$AGENT_HOME/bin/log_retention.sh"
+rm -f "$AGENT_LOG_DIR/demo-new.log" "$ARCH"/demo-*.gz
 
 ok "수집 완료: $OUT"
 ls -l "$OUT" | sed 's/^/    /'
