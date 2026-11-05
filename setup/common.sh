@@ -22,4 +22,5 @@ source "$REPO_ROOT/config/agent-app.env"
 # 제공 앱은 secret.key 를 찾는다: [3/5] Missing File: secret.key
 # 미션 문서의 이름(t_secret.key)은 같은 파일을 가리키는 심볼릭 링크로 함께 둔다.
 KEY_FILE="$AGENT_KEY_PATH/secret.key"
+# shellcheck disable=SC2034
 KEY_ALIAS="$AGENT_KEY_PATH/t_secret.key"
