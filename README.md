@@ -20,6 +20,44 @@
 | 로그 | `/var/log/agent-app/monitor.log`, 10MB 넘으면 회전, **최대 10개** 유지 |
 | 보너스 | `report.sh` 통계 / `log_retention.sh` 7일 압축·아카이브, 30일 삭제 |
 
+## 결과 한눈에
+
+실제 서버(OrbStack 리눅스 머신, Ubuntu 22.04.5, x86_64)에서 수집한 결과입니다. 자세한 출력은 [수행 내역서](docs/수행내역서.md) §2, 원본은 [evidence/](evidence/).
+
+| # | 필수 증거 | 핵심 결과 | 원본 |
+|---|---|---|---|
+| 1 | SSH 20022 + root 원격 차단 | `sshd -T` → `port 20022`, `permitrootlogin no` / `0.0.0.0:20022 LISTEN` | [01](evidence/01-ssh.txt) |
+| 2 | 방화벽 2포트만 허용 | `Status: active`, `Default: deny (incoming)`, ALLOW 는 `20022/tcp`·`15034/tcp` 뿐 | [02](evidence/02-firewall.txt) |
+| 3 | 계정 3 · 그룹 2 | `agent-core:x:1001:agent-admin,agent-dev` — agent-test 는 core 에 없음 | [03](evidence/03-accounts.txt) |
+| 4 | 디렉터리 · 권한 · ACL | 계정별 직접 시도 12건 기대대로 (예: `agent-test DENY api_keys 읽기`) | [04](evidence/04-permissions.txt) |
+| 5 | Boot 5단계 + Agent READY | `[1/5]`~`[5/5]` 모두 `[OK]`, `All Boot Checks Passed!`, `Agent READY`, `0.0.0.0:15034` LISTEN | [05](evidence/05-app-boot.txt) |
+| 6 | monitor.sh 실행 결과 | 프로세스·포트·방화벽 `[OK]`, CPU 2.6% / MEM 5.4% / DISK 1%, 임계값 낮춘 시연에서 `[WARNING]` 3종 | [06](evidence/06-monitor-run.txt) |
+| 7 | monitor.log 누적 | `[2026-11-05 21:57:01] PID:5232 CPU:3.4% MEM:5.8% DISK_USED:1%` | [07](evidence/07-cron.txt) |
+| 8 | cron 매분 + 1분 후 증가 | 70초 대기 동안 줄 수 20 → 21, `journalctl` 에 `(agent-admin) CMD (.../monitor.sh ...)` 매분 기록 | [07](evidence/07-cron.txt) |
+| + | 보너스 | `report.sh` 21샘플 평균·최대·최소 / 보존 정책: 8일 전 파일만 압축·이동, 31일 전 아카이브만 삭제 | [08](evidence/08-report.txt) · [09](evidence/09-retention.txt) |
+
+## 미션 문서와 실제 앱이 다른 점
+
+| 항목 | 미션 문서 | 실제 앱이 요구한 것 (부팅 오류 메시지 기준) |
+|---|---|---|
+| `AGENT_KEY_PATH` | `$AGENT_HOME/api_keys/t_secret.key` (파일) | `$AGENT_HOME/api_keys` (**디렉터리**) — `Key Path Mismatch. Expected: .../api_keys` |
+| 키 파일 이름 | `t_secret.key` | **`secret.key`** — `Missing File: secret.key` |
+
+실제 파일은 `secret.key` 로 만들고, 문서 이름 `t_secret.key` 는 같은 파일을 가리키는 심볼릭 링크로 남겨 두 기준을 모두 만족시켰습니다 ([config/agent-app.env](config/agent-app.env)).
+
+## 과제 목표 — 한 줄 요약
+
+자세한 설명은 [수행 내역서 §3](docs/수행내역서.md#3-과제-목표--설명).
+
+| 질문 | 요약 |
+|---|---|
+| SSH 포트 변경 · root 차단은 왜 기본 보안인가 | 22번 대상 자동 스캔을 피하고, 누구나 아는 계정명 `root` 로 바로 최고 권한을 노리는 길을 막는다 |
+| "필요 포트만 허용"을 어떻게 구성·검증했나 | 기본 차단 + 20022·15034 예외. 20022 를 먼저 허용한 뒤 활성화하고, 허용 목록이 정확히 2개인지 스크립트가 검사 |
+| 계정·그룹·ACL 로 공유/보안 디렉터리를 나누는 이유 | 최소 권한. 권한은 사람이 아니라 그룹에 주고, default ACL 로 앞으로 생길 파일까지 같은 규칙 적용 |
+| 환경 변수로 실행 환경을 고정하는 이유와 검증 | 같은 프로그램을 설정만 바꿔 어디서든 동일하게 실행. 실행 계정 로그인 셸의 `env` + 앱의 `[2/5] [OK]` 로 이중 확인 |
+| 스크립트로 수집 → 로그로 추적하는 흐름 | 살아있나 → 방어선 켜졌나 → 자원 여유 있나 순서로 확인하고 시각이 찍힌 고정 형식 한 줄로 남겨, 언제부터 이상했는지 거슬러 올라갈 수 있다 |
+| cron 주기 실행과 로그 보존 정책이 필요한 이유 | 아무도 안 볼 때의 상태까지 기록. 로그가 디스크를 채워 서비스를 멈추지 않도록 크기(10MB×10)·시간(7일 압축, 30일 삭제) 상한 |
+
 ## 폴더 구조
 
 ```
